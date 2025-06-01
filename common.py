@@ -1,0 +1,190 @@
+from dataclasses import dataclass
+import logging
+from typing import Any, Dict, List, Optional
+
+from logging import Logger
+import re
+from typing import Any, Dict
+from azure.ai.ml import MLClient
+from azure.ai.ml.constants import AssetTypes
+from azure.ai.ml.entities import Data
+from azure.identity import DefaultAzureCredential
+
+# region: common args for aml pipelines #########################
+@dataclass
+class FlowStepConfig:
+    step_name: str
+    component_name: str
+    kwargs: Dict[str, Any]
+
+
+@dataclass
+class DAGFlowStepInputConfig:
+    sink_input_name: Optional[str] # name of the input of this component to recive input, if None, default "input_dir"
+    source_name: Optional[str] # name of the source input data asset or another step name, if None, default last step
+    source_output_name: Optional[str] # name of the output name if the source is another step
+
+
+@dataclass
+class DAGFlowStepConfig:
+    component_name: str
+
+    # if None, =component_name, but make sure 
+    # (1) it is unique among the job; 
+    # (2) valid node name in AML [a-z0-9_], and starting with [a-z]
+    step_name: Optional[str]=None 
+    kwargs: Optional[Dict[str, Any]]=None
+
+    # default None means: 
+    # If the flowstep is the 1st step: the 1st input_asset
+    # Else: take last step, i.e., fall back and comptiable to the uniflow mode
+    inputs: Optional[List[DAGFlowStepInputConfig]]=None 
+    compute: Optional[str]=None
+
+
+@dataclass
+class AMLComponentConfig:
+    component_name: str
+    
+    source: Optional[str]="workspace" # workspace | registry
+
+    # from registry
+    registry_name: Optional[str]=None
+    
+    version: Optional[str]=None
+    
+    kwargs_default: Optional[Dict[str, Any]]=None
+
+# common args
+@dataclass
+class DatasetArgs:
+    name: str = str()
+    version: str = str()
+    create_from_path: Optional[str] = None # an url path from local, datastore, azure storage, etc. see https://learn.microsoft.com/en-us/azure/machine-learning/how-to-create-data-assets?view=azureml-api-2&tabs=cli#create-data-assets
+
+
+@dataclass
+class AmlWorkspaceConfig:
+    workspace_name: str = str()
+    resource_group: str = str()
+    subscription_id: str = str()
+
+
+@dataclass
+class AmlRegistryConfig:
+    registry_name: str = str()
+    registry_location: Optional[str] = None
+
+# endregion: common args for aml pipelines #########################
+
+
+# region: aml utils ################################################
+
+
+def create_workspace_ml_clients(workspace_subscription_id, workspace_resource_group, workspace_name):
+    return MLClient(
+        credential=DefaultAzureCredential(),         
+        subscription_id=workspace_subscription_id,
+        resource_group_name=workspace_resource_group,
+        workspace_name=workspace_name,
+    )
+
+
+def create_workspace_ml_client_ws(config: AmlWorkspaceConfig):
+    return create_workspace_ml_clients(
+        workspace_subscription_id=config.subscription_id,
+        workspace_resource_group=config.resource_group,
+        workspace_name=config.workspace_name,
+    )
+
+
+def create_registry_ml_client(config: AmlRegistryConfig):
+    return MLClient(
+        credential=DefaultAzureCredential(),  
+        registry_name=config.registry_name,
+        registry_location=config.registry_location,
+    )
+
+
+def load_or_create_data_asset(ml_client: MLClient, name: str, version: str, create_from_path: str, logger: Logger):
+    try:
+        ds = ml_client.data.get(name, version=version)
+        logger.info(f"Existing data asset found for {name}:{version}")
+        if create_from_path is not None:
+            logger.warning(f"[!WARNING!] Existing data asset found for {name}:{version}. model_ckpt.create_from_path is not None but ignored! Please update version number if want to overwrite!")
+    except:    
+        logger.info(f"Creating data asset from given path: {create_from_path}")
+        ds = Data(
+            path=create_from_path,
+            type=AssetTypes.URI_FOLDER,
+            name=name,
+            version=version,
+        )
+        
+        ml_client.data.create_or_update(ds)
+        ds = ml_client.data.get(name, version=version)
+
+    return ds
+
+def load_or_create_data_asset_(ml_client: MLClient, data_asset_config: DatasetArgs, logger: Logger):
+    return load_or_create_data_asset(
+        ml_client=ml_client,
+        name=data_asset_config.name,
+        version=data_asset_config.version,
+        create_from_path=data_asset_config.create_from_path,
+        logger=logger
+    )
+
+
+def valid_node_name(s):
+    return re.sub(r"\W+", "_", s)
+
+
+def override_kwargs(kwargs_default: Dict[str,Any], kwargs_override: Dict[str,Any]) -> Dict[str,Any]:
+    if kwargs_default is None or kwargs_override is None:
+        return {**(kwargs_default or kwargs_override or {})}
+    
+    kwargs = {**kwargs_default}
+    for k, v in kwargs_override.items():
+        kwargs[k] = v
+
+    return kwargs
+
+# endregion: aml utils ################################################
+
+# region: common utils ################################################
+
+class ColorFormatter(logging.Formatter):
+    """Logging Formatter to add colors and count warning / errors"""
+
+    grey   = "\x1b[90m"
+    green  = "\x1b[92m"
+    yellow = "\x1b[93m"
+    red    = "\x1b[91m"
+    reset  = "\x1b[0m"
+    format = "[%(asctime)s | %(levelname)-5.5s] %(message)s"
+
+    FORMATS = {
+        logging.DEBUG: grey + format + reset,
+        logging.INFO: green + format + reset,
+        logging.WARNING: yellow + format + reset,
+        logging.ERROR: red + format + reset,
+        logging.CRITICAL: red + format + reset
+    }
+
+    def format(self, record):
+        record.levelname = 'WARN' if record.levelname == 'WARNING' else record.levelname
+        record.levelname = 'ERROR' if record.levelname == 'CRITICAL' else record.levelname
+        log_fmt = self.FORMATS.get(record.levelno)
+        formatter = logging.Formatter(log_fmt)
+        return formatter.format(record)
+
+def color_logger(logger: logging.Logger):
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.DEBUG)
+    ch.setFormatter(ColorFormatter())
+    logger.addHandler(ch)
+    return logger
+
+
+# endregion: common utils ################################################
