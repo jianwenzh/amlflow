@@ -17,7 +17,7 @@ from logging import Logger
 
 from azure.ai.ml import Output
 
-from .common import (
+from common import (
     AMLComponentConfig, 
     AmlRegistryConfig, 
     AmlWorkspaceConfig, 

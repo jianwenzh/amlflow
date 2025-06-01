@@ -20,7 +20,7 @@ from azure.ai.ml import Output
 
 sys.path.append(r'.')
 
-from .common import (
+from common import (
     AMLComponentConfig, 
     AmlRegistryConfig, 
     AmlWorkspaceConfig, 
