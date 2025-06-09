@@ -89,23 +89,45 @@ def create_pipeline(
     aml_resources: AmlResources,
 ):
     step_name_prefix = step_name_prefix or ''
-    @pipeline(name=name, compute=aml_resources.cpu_target)
-    def _pipeline(input_data_asset: Input):
+    def pipeline_func(
+        input_data_asset: Input
+    ):
         step_input = input_data_asset
         step_idx = 0
         for step in pipeline_configs.flow_steps_config:
             step_component = aml_resources.components[step.component_name]
-            step_output = step_component(
-                input_dir=step_input,
-                **step.kwargs
-            )
+            if step.get('no_input', False):
+                step_output = step_component(
+                    **step.kwargs
+                )
+            else:
+                step_output = step_component(
+                    input_dir=step_input,
+                    **step.kwargs
+                )
             valid_name = valid_node_name(f"s-{step_name_prefix or ''}-{step_idx}-{step.component_name}")
             step_output.name = valid_name
+            if step.get('compute', None):
+                step_output.compute = step.compute
+                
             step_input = step_output.outputs.output_dir
             step_idx += 1
 
         return {"output_dir": step_output.outputs.output_dir}
     
+    @pipeline(name=name, compute=aml_resources.cpu_target)
+    def _pipeline(input_data_asset: Input):
+        return pipeline_func(input_data_asset=input_data_asset)
+    
+    @pipeline(name=name, compute=aml_resources.cpu_target)
+    def _pipeline_wo_input():
+        return pipeline_func(input_data_asset=None)
+    
+    if pipeline_configs.flow_steps_config[0].get('no_input', False):
+        _pipeline = _pipeline_wo_input
+    else:
+        _pipeline = _pipeline
+
     return _pipeline
 
 
@@ -128,13 +150,17 @@ def run(
         aml_resources=aml_resources
     )
 
-    input_data_asset = load_or_create_data_asset_(
-        ml_client=aml_resources.ml_client_ws,
-        data_asset_config=pipeline_cfg.input_data,
-        logger=logger
-    )
+    if pipeline_cfg.flow_steps_config[0].get('no_input', False):
+        # if the first step has no input, i.e., the component does not require input data asset
+        pipeline_job = pipeline_fn()
+    else:
+        input_data_asset = load_or_create_data_asset_(
+            ml_client=aml_resources.ml_client_ws,
+            data_asset_config=pipeline_cfg.input_data,
+            logger=logger
+        )
 
-    pipeline_job = pipeline_fn(input_data_asset=input_data_asset)
+        pipeline_job = pipeline_fn(input_data_asset=input_data_asset)
     
     # recording the cfgs in job properties
     pipeline_job.properties["pipeline_config"] = pipeline_cfg
