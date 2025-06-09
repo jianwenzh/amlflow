@@ -16,6 +16,7 @@ class FlowStepConfig:
     step_name: str
     component_name: str
     kwargs: Dict[str, Any]
+    no_input: Optional[bool]=False
 
 
 @dataclass
@@ -23,7 +24,7 @@ class DAGFlowStepInputConfig:
     sink_input_name: Optional[str] # name of the input of this component to recive input, if None, default "input_dir"
     source_name: Optional[str] # name of the source input data asset or another step name, if None, default last step
     source_output_name: Optional[str] # name of the output name if the source is another step
-
+    no_input: Optional[bool]=False # if True, no input data asset is required, i.e., the component does not have input data asset, e.g., download hf data/model component that does not require input data asset, but only parameters
 
 @dataclass
 class DAGFlowStepConfig:
@@ -40,6 +41,7 @@ class DAGFlowStepConfig:
     # Else: take last step, i.e., fall back and comptiable to the uniflow mode
     inputs: Optional[List[DAGFlowStepInputConfig]]=None 
     compute: Optional[str]=None
+    no_input: Optional[bool]=False # if True, no input data asset is required, i.e., the component does not have input data asset, e.g., a model training component that does not require input data asset, but only parameters
 
 
 @dataclass
@@ -102,7 +104,7 @@ def create_registry_ml_client(config: AmlRegistryConfig):
     return MLClient(
         credential=DefaultAzureCredential(),  
         registry_name=config.registry_name,
-        registry_location=config.registry_location,
+        registry_location=config.get('registry_location', None)  # Optional, if not provided, will use the default location of the registry
     )
 
 

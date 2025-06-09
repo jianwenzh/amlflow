@@ -102,19 +102,20 @@ def create_pipeline(
         last_step_default_output = None
         for step_config in pipeline_configs.flow_steps_config:
             step_component_kwargs = {**step_config.kwargs} if step_config.kwargs else {}
-            # get inputs
-            if step_config.inputs is None:
-                step_component_kwargs["input_dir"] = input_data_assets[0] if step_idx == 0 else last_step_default_output
-            else:
-                for input_config in step_config.inputs:
-                    source_data = None
-                    if input_config.get('source_output_name', None) is None:
-                        source_data = data_asset_dict[input_config.source_name]
-                    else:
-                        source_step_output_name = _get_step_output_name(step_name=input_config.source_name, output_name=input_config.source_output_name)
-                        source_data = step_outputs[source_step_output_name]
+            if not step_config.get('no_input', False):
+                # get inputs
+                if step_config.inputs is None:
+                    step_component_kwargs["input_dir"] = input_data_assets[0] if step_idx == 0 else last_step_default_output
+                else:
+                    for input_config in step_config.inputs:
+                        source_data = None
+                        if input_config.get('source_output_name', None) is None:
+                            source_data = data_asset_dict[input_config.source_name]
+                        else:
+                            source_step_output_name = _get_step_output_name(step_name=input_config.source_name, output_name=input_config.source_output_name)
+                            source_data = step_outputs[source_step_output_name]
 
-                    step_component_kwargs[input_config.sink_input_name] = source_data
+                        step_component_kwargs[input_config.sink_input_name] = source_data
 
             step_component = aml_resources.components[step_config.component_name]
             step_output = step_component(**step_component_kwargs)
