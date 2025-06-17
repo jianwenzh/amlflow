@@ -6,7 +6,7 @@ import logging
 import os
 from pathlib import Path
 import sys
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Union
 
 from hydra import compose, initialize
 
@@ -46,6 +46,7 @@ class PipelineConfigs:
     experiment: str
     output_path: str
     output_mode: str
+    direct_output: Optional[bool] # no intemediate folders
     input_data: DatasetArgs
     flow_steps_config: List[FlowStepConfig]
     resource_config: ResourceConfigs
@@ -136,7 +137,7 @@ def run(
         job_name: str,
         pipeline_cfg: PipelineConfigs,
         logger: logging.Logger,
-        output_subfolder: str,
+        # output_subfolder: str,
         experiment_name: str = None,
         ):
     orig_loglevel = logger.level
@@ -166,15 +167,15 @@ def run(
     pipeline_job.properties["pipeline_config"] = pipeline_cfg
 
     if 'output_path' in pipeline_cfg and pipeline_cfg.output_path:
-        pipeline_output_path = pipeline_cfg.output_path.rstrip("/") + "/" + output_subfolder.rstrip("/")
+        pipeline_output_path = pipeline_cfg.output_path.rstrip("/") # + "/" + output_subfolder.rstrip("/")
         output_mode = 'upload'
         if 'output_mode' in pipeline_cfg and pipeline_cfg.output_mode:
             output_mode = pipeline_cfg.output_mode
 
         for k in pipeline_job.outputs:
-
+            output_path = f"{pipeline_output_path}/{timestamp}/{k}" if pipeline_cfg.get('direct_output', False) else f"{pipeline_output_path}/{timestamp}/{k}/" + r"${{name}}"
             pipeline_job.outputs[k] = Output(
-                type="uri_folder", mode=output_mode, path=f"{pipeline_output_path}/{timestamp}/{k}/" + r"${{name}}" )
+                type="uri_folder", mode=output_mode, path=output_path )
 
     pipeline_run = aml_resources.ml_client_ws.jobs.create_or_update(
         pipeline_job,
@@ -216,7 +217,9 @@ def main(
     
     logger.info(f"job_name={job_name}")
 
-    run(timestamp=timestamp, experiment_name=experiment_name, job_name=job_name, pipeline_cfg=pipeline_cfg, logger=logger, output_subfolder=config_name)
+    run(timestamp=timestamp, experiment_name=experiment_name, job_name=job_name, pipeline_cfg=pipeline_cfg, logger=logger, 
+        # output_subfolder=None
+        )
 
 
 if __name__ == "__main__":

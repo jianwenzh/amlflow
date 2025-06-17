@@ -1,0 +1,55 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
+name: hf_model_download
+display_name: hf_model_download
+version: 0.0.4
+description: >
+  - hf_model_download
+
+  - 0.0.4: Change to use amlflow repo environment
+  
+  - 0.0.3: Debug issue with huggingface-cli download
+
+  - 0.0.1: Initial version
+  
+is_deterministic: true
+tags:
+  author: jianwenzh@gmail.com
+type: command
+
+inputs:
+
+  model_name: 
+    type: string
+    # the huggingface model name, e.g., "meta-llama/Llama-2-7b-hf"
+
+  seed:
+    type: string
+    default: "0"
+    # for re-run, set to a different value
+
+
+outputs:
+  output_dir:
+    type: uri_folder
+
+code: .
+
+environment: azureml:amlflow-cpu:0.0.1
+  
+command: >-
+
+  df
+
+  mkdir ./tmp_download
+
+  huggingface-cli download ${{inputs.model_name}} --local-dir ./tmp_download
+
+  ls ./tmp_download
+
+  echo removig .cache folder
+
+  rm -rf ./tmp_download/.cache
+
+  echo copying to outputs.output_dir=${{outputs.output_dir}}
+
+  cp -r ./tmp_download/* ${{outputs.output_dir}}/

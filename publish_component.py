@@ -44,8 +44,10 @@ def main(
         config = yaml.safe_load(file)
 
     print(f"config: {config}")
+
+    no_src = src_path is None or src_path.lower() == "none"
     
-    if src_path is not None:
+    if not no_src:
         print("no_src is False, will copy src folder to component folder")
         local_src_abs_path = os.path.abspath(src_path)
         if not os.path.exists(local_src_abs_path) or not os.path.isdir(local_src_abs_path):
@@ -64,7 +66,7 @@ def main(
     component = load_component(config_file)
     component = ml_client.components.create_or_update(component)
 
-    if src_path is not None:
+    if not no_src:
         print("clean up component folder")
         shutil.rmtree(os.path.join(comp_dir, "src"))
 
