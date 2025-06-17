@@ -1,0 +1,53 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
+name: hf_dataset_download
+display_name: hf_dataset_download
+version: 0.0.2
+description: >
+  - hf_dataset_download
+
+  - 0.0.2: Change to use local temp dir as transition folder; remove .cache folder
+
+  - 0.0.1: Initial version
+  
+is_deterministic: true
+tags:
+  author: jianwenzh@gmail.com
+type: command
+
+inputs:
+
+  dataset_name: 
+    type: string
+    # the huggingface model name, e.g., "meta-llama/Llama-2-7b-hf"
+
+  seed:
+    type: string
+    default: "0"
+    # for re-run, set to a different value
+
+
+outputs:
+  output_dir:
+    type: uri_folder
+
+code: .
+
+environment: azureml:amlflow-cpu:0.0.1
+  
+command: >-
+
+  df
+
+  mkdir ./tmp_download
+
+  huggingface-cli download ${{inputs.dataset_name}} --repo-type dataset --local-dir ./tmp_download
+
+  ls ./tmp_download
+
+  echo removig .cache folder
+
+  rm -rf ./tmp_download/.cache
+
+  echo copying to outputs.output_dir=${{outputs.output_dir}}
+
+  cp -r ./tmp_download/* ${{outputs.output_dir}}/
