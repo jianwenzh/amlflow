@@ -5,9 +5,9 @@ from typing import Any, Dict, List, Optional
 from logging import Logger
 import re
 from typing import Any, Dict
-from azure.ai.ml import MLClient
+from azure.ai.ml import MLClient, PyTorchDistribution
 from azure.ai.ml.constants import AssetTypes
-from azure.ai.ml.entities import Data
+from azure.ai.ml.entities import Data, JobResourceConfiguration
 from azure.identity import DefaultAzureCredential
 
 # region: common args for aml pipelines #########################
@@ -17,6 +17,16 @@ class FlowStepConfig:
     component_name: str
     kwargs: Dict[str, Any]
     no_input: Optional[bool]=False
+
+    # resource kwargs used to fill JobResourceConfiguration, e.g., shm_size, instance_count, etc.
+    # https://learn.microsoft.com/en-us/python/api/azure-ai-ml/azure.ai.ml.entities.jobresourceconfiguration?view=azure-python
+    resources_kwargs: Optional[Dict[str, Any]]=None
+
+    # PyTorch, Mpi, TensorFlow, Ray
+    distribution: Optional[str]=None
+    # distribution_kwargs used to fill distribution configs
+    # e.g., for PyTorchDistribution: process_count_per_instance
+    distribution_kwargs: Optional[Dict[str, Any]]=None
 
 
 @dataclass
@@ -42,7 +52,16 @@ class DAGFlowStepConfig:
     inputs: Optional[List[DAGFlowStepInputConfig]]=None 
     compute: Optional[str]=None
     no_input: Optional[bool]=False # if True, no input data asset is required, i.e., the component does not have input data asset, e.g., a model training component that does not require input data asset, but only parameters
+    
+    # resource kwargs used to fill JobResourceConfiguration, e.g., shm_size, instance_count, etc.
+    # https://learn.microsoft.com/en-us/python/api/azure-ai-ml/azure.ai.ml.entities.jobresourceconfiguration?view=azure-python
+    resources_kwargs: Optional[Dict[str, Any]]=None
 
+    # PyTorch, Mpi, TensorFlow, Ray
+    distribution: Optional[str]=None
+    # distribution_kwargs used to fill distribution configs
+    # e.g., for PyTorchDistribution: process_count_per_instance
+    distribution_kwargs: Optional[Dict[str, Any]]=None
 
 @dataclass
 class AMLComponentConfig:
@@ -190,3 +209,25 @@ def color_logger(logger: logging.Logger):
 
 
 # endregion: common utils ################################################
+
+# region: aml flow utils ################################################
+
+def set_step_ext_configs(step_config, step_func):
+    """
+    Set the step's resource and distribution configs if provided.
+    """
+    if step_config.get("compute", None):
+        step_func.compute = step_config.compute
+
+    if step_config.get("resources_kwargs", None):
+        step_func.resources = JobResourceConfiguration(**step_config.resources_kwargs)
+
+    if step_config.get("distribution", None):
+        if step_config.distribution.lower() == "pytorch":
+            step_func.distribution = PyTorchDistribution(**step_config.get("distribution_kwargs", {}))
+        else:
+            raise ValueError(f"Unsupported distribution type: {step_config.distribution}. Only 'PyTorch' is supported.")
+
+    return step_func
+
+# endregion: aml flow utils ################################################

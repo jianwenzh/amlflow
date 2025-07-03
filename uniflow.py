@@ -10,7 +10,7 @@ from typing import Dict, List, Optional, Union
 
 from hydra import compose, initialize
 
-from azure.ai.ml.entities import CommandComponent, ParallelComponent, PipelineComponent
+from azure.ai.ml.entities import CommandComponent, ParallelComponent, PipelineComponent, JobResourceConfiguration
 from azure.ai.ml import Input, MLClient, load_component
 from azure.ai.ml.dsl import pipeline
 
@@ -30,7 +30,8 @@ from common import (
     create_workspace_ml_client_ws, 
     load_or_create_data_asset_, 
     valid_node_name,
-    color_logger
+    color_logger,
+    set_step_ext_configs
 )
 
 
@@ -108,9 +109,12 @@ def create_pipeline(
                 )
             valid_name = valid_node_name(f"s-{step_name_prefix or ''}-{step_idx}-{step.component_name}")
             step_output.name = valid_name
-            if step.get('compute', None):
-                step_output.compute = step.compute
-                
+            
+            set_step_ext_configs(
+                step_config=step,
+                step_func=step_output,
+            )
+            
             step_input = step_output.outputs.output_dir
             step_idx += 1
 
