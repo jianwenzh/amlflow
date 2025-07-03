@@ -9,7 +9,7 @@ from typing import Dict, List, Union
 
 from hydra import compose, initialize
 
-from azure.ai.ml.entities import CommandComponent, ParallelComponent, PipelineComponent, Data
+from azure.ai.ml.entities import CommandComponent, ParallelComponent, PipelineComponent, Data, JobResourceConfiguration
 from azure.ai.ml import Input, MLClient, load_component
 from azure.ai.ml.dsl import pipeline
 
@@ -27,7 +27,8 @@ from common import (
     create_workspace_ml_client_ws, 
     load_or_create_data_asset_, 
     valid_node_name,
-    color_logger
+    color_logger,
+    set_step_ext_configs
 )
 
 
@@ -122,8 +123,11 @@ def create_pipeline(
             step_name = step_config.step_name or step_config.component_name # _get_step_name(step_config=step_config)
             step_output.name = valid_node_name(f"s-{step_name_prefix or ''}-{step_name}") # for friendly of aml metrics plot naming
             step_output.description = f"Pipeline job: {name}" # add pipeline job info to each step description, for convenience of dashboard metadata view in columns
-            if 'compute' in step_config and step_config.compute:
-                step_output.compute = step_config.compute
+            
+            set_step_ext_configs(
+                step_config=step_config,
+                step_func=step_output,
+            )
 
             for output_name, output_data in step_output.outputs.items():
                 step_outputs[_get_step_output_name(step_name=step_name, output_name=output_name)] = output_data
