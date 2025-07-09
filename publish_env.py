@@ -1,7 +1,7 @@
 # import required libraries
 import os
 from azure.ai.ml import MLClient
-from azure.ai.ml.entities import Environment
+from azure.ai.ml.entities import Environment, BuildContext
 from azure.identity import DefaultAzureCredential
 import fire
 import yaml
@@ -39,18 +39,32 @@ def main(
         config = yaml.safe_load(file)
 
     print(f"config: {config}")
-    
-    name, version, image, conda_file, description = config['name'], config['version'], config['image'], config['conda_file'], config['description']
-    # conda_file is relative path now, convert to absolute path
-    conda_file = os.path.abspath(os.path.join(os.path.dirname(config_file), conda_file))
-    print(f"conda_file: {conda_file}")
-    env_docker = Environment(
-        image=image,
-        conda_file=conda_file,
-        name=name,
-        version=version,
-        description=description,
-    )
+    name, version, description = config['name'], config['version'], config['description']
+
+    if 'docker_context_path' in config:
+        docker_context_path = config['docker_context_path']
+        print(f"docker_context_path: {docker_context_path}")
+        # convert to absolute path
+        docker_context_path = os.path.abspath(os.path.join(os.path.dirname(config_file), docker_context_path))
+        print(f"docker_context_path: {docker_context_path}")
+        env_docker = Environment(
+            build=BuildContext(path=docker_context_path),
+            name=name,
+            version=version,
+            description=description,
+        )
+    else:
+        image, conda_file = config['image'], config['conda_file']
+        # conda_file is relative path now, convert to absolute path
+        conda_file = os.path.abspath(os.path.join(os.path.dirname(config_file), conda_file))
+        print(f"conda_file: {conda_file}")
+        env_docker = Environment(
+            image=image,
+            conda_file=conda_file,
+            name=name,
+            version=version,
+            description=description,
+        )
 
     print(f"create_or_update...")
     ml_client.environments.create_or_update(env_docker)
