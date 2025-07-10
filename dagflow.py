@@ -5,11 +5,11 @@ from datetime import datetime
 import logging
 import os
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import Any, Dict, List, Union
 
 from hydra import compose, initialize
 
-from azure.ai.ml.entities import CommandComponent, ParallelComponent, PipelineComponent, Data, JobResourceConfiguration
+from azure.ai.ml.entities import CommandComponent, ParallelComponent, PipelineComponent, Data
 from azure.ai.ml import Input, MLClient, load_component
 from azure.ai.ml.dsl import pipeline
 
@@ -23,6 +23,7 @@ from common import (
     AmlWorkspaceConfig, 
     DAGFlowStepConfig, 
     DatasetArgs,
+    create_parallel_pipeline_component,
     create_registry_ml_client, 
     create_workspace_ml_client_ws, 
     load_or_create_data_asset_, 
@@ -89,6 +90,7 @@ def _create_data_assets(mlclient: MLClient, data_assets_config: List[DatasetArgs
 def _get_step_output_name(step_name: str, output_name: str) -> str:
     return valid_node_name(f"{step_name}:{output_name}")
 
+
 def create_pipeline(
     name: str,
     step_name_prefix: str,
@@ -119,15 +121,37 @@ def create_pipeline(
                         step_component_kwargs[input_config.sink_input_name] = source_data
 
             step_component = aml_resources.components[step_config.component_name]
-            step_output = step_component(**step_component_kwargs)
             step_name = step_config.step_name or step_config.component_name # _get_step_name(step_config=step_config)
-            step_output.name = valid_node_name(f"s-{step_name_prefix or ''}-{step_name}") # for friendly of aml metrics plot naming
-            step_output.description = f"Pipeline job: {name}" # add pipeline job info to each step description, for convenience of dashboard metadata view in columns
-            
-            set_step_ext_configs(
-                step_config=step_config,
-                step_func=step_output,
-            )
+            if step_config.get('n_splits', None):
+                # parallel component
+                spliter_component = aml_resources.components[step_config.spliter_component_name]
+                spliter_kwargs = step_config.get('spliter_kwargs', None)
+                merger_component = aml_resources.components[step_config.merger_component_name]
+                step_par_func = create_parallel_pipeline_component(
+                    # name='parallel_step',
+                    worker_component=step_component,
+                    worker_component_kwargs=step_component_kwargs,
+                    worker_compute=step_config.get("compute", None),
+                    n_splits=step_config.n_splits,
+                    name_of_input_to_split=step_config.input_name_to_split,
+                    spliter_component=spliter_component,
+                    spliter_kwargs=spliter_kwargs,
+                    spliter_compute=step_config.spliter_compute,
+                    merger_component=merger_component,
+                    merger_kwargs=step_config.get('merger_kwargs', None),
+                    merger_compute=step_config.merger_compute
+                )
+                step_output = step_par_func()
+            else:
+                
+                step_output = step_component(**step_component_kwargs)
+                step_output.name = valid_node_name(f"s-{step_name_prefix or ''}-{step_name}") # for friendly of aml metrics plot naming
+                step_output.description = f"Pipeline job: {name}" # add pipeline job info to each step description, for convenience of dashboard metadata view in columns
+                
+                set_step_ext_configs(
+                    step_config=step_config,
+                    step_func=step_output,
+                )
 
             for output_name, output_data in step_output.outputs.items():
                 step_outputs[_get_step_output_name(step_name=step_name, output_name=output_name)] = output_data

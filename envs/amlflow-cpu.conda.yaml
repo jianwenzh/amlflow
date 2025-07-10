@@ -6,4 +6,5 @@ dependencies:
   - pip
   - pip:
     - huggingface_hub[cli]
+    - fire
     
