@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from logging import Logger
 import re
@@ -8,7 +8,9 @@ from typing import Any, Dict
 from azure.ai.ml import MLClient, PyTorchDistribution
 from azure.ai.ml.constants import AssetTypes
 from azure.ai.ml.entities import Data, JobResourceConfiguration
+from azure.ai.ml.entities import CommandComponent, ParallelComponent, PipelineComponent
 from azure.identity import DefaultAzureCredential
+from azure.ai.ml.dsl import pipeline
 
 # region: common args for aml pipelines #########################
 @dataclass
@@ -62,6 +64,17 @@ class DAGFlowStepConfig:
     # distribution_kwargs used to fill distribution configs
     # e.g., for PyTorchDistribution: process_count_per_instance
     distribution_kwargs: Optional[Dict[str, Any]]=None
+
+    # parallel component config
+    n_splits: Optional[int]=None # if not None, the step will be parallelized with n_splits, and the component should be a CommandComponent or ParallelComponent
+    input_name_to_split: Optional[str]=None # if not None, the input to be split into n_splits, e.g., "input_dir", "input_data", etc.
+    spliter_component_name: Optional[str]=None # the component to split the input into n_splits, e.g., "spliter_component"
+    spliter_kwargs: Optional[Dict[str, Any]]=None # the kwargs to pass to the spliter component, e.g., {"glob_patterns": "*.jpg|*.png"} for file globbing
+    spliter_compute: Optional[str]=None # the compute to run the spliter component, e.g., "cpu-cluster", "gpu-cluster", etc.
+    merger_component_name: Optional[str]=None # the component to merge the outputs of the worker component, e.g., "merger_component"
+    merger_kwargs: Optional[Dict[str, Any]]=None # the kwargs to pass to the merger component, e.g., {"output_dir": "/path/to/output"}
+    merger_compute: Optional[str]=None # the compute to run the merger component, e.g., "cpu-cluster", "gpu-cluster", etc.
+
 
 @dataclass
 class AMLComponentConfig:
@@ -231,3 +244,67 @@ def set_step_ext_configs(step_config, step_func):
     return step_func
 
 # endregion: aml flow utils ################################################
+
+
+# region: parallel pipeline component utils ################################################
+def create_parallel_pipeline_component(
+    # name: str,
+    worker_component: Union[CommandComponent, ParallelComponent, PipelineComponent],
+    worker_component_kwargs: Dict[str, Any],
+    worker_compute: str,
+    name_of_input_to_split: str,
+    n_splits: int,
+    spliter_component: Union[CommandComponent, ParallelComponent, PipelineComponent],
+    spliter_kwargs: Dict[str, Any],
+    spliter_compute: str,
+    merger_component: Union[CommandComponent, ParallelComponent, PipelineComponent],
+    merger_kwargs: Dict[str, Any],
+    merger_compute: str,
+):
+    """
+    Create a pipeline component to parallelize the execution of a given component. Three steps:
+    1. Split the input data into `n_splits` parts.
+    2. Execute the component in parallel on each split.
+    3. Merge the outputs of the component into a single output.
+
+    Args:
+        name (str): The name of the pipeline component.
+        worker_component (Union[CommandComponent, ParallelComponent, PipelineComponent]): The component to be executed in parallel.
+        worker_component_kwargs (Dict[str, Any]): The keyword arguments for the worker component.
+        worker_compute (str): The compute target for the worker component.
+        name_of_input_to_split (str): The name of the input to be split into multiple parts.
+        n_splits (int): The number of splits to create.
+        spliter_component (Union[CommandComponent, ParallelComponent, PipelineComponent]): The component used to split the input data.
+        spliter_kwargs (Dict[str, Any]): The keyword arguments for the spliter component.
+        spliter_compute (str): The compute target for the spliter component.
+        merger_component (Union[CommandComponent, ParallelComponent, PipelineComponent]): The component used to merge the outputs.
+        merger_kwargs (Dict[str, Any]): The keyword arguments for the merger component.
+        merger_compute (str): The compute target for the merger component.
+    """
+    spliter_kwargs = {**spliter_kwargs, 'n_splits': n_splits}  # Ensure spliter_kwargs is a copy to avoid modifying the original
+    
+    # @pipeline(name=name)
+    def pipeline_comp_func(
+    ):
+        spliter_func = spliter_component(
+            input_dir=worker_component_kwargs[name_of_input_to_split], 
+            **spliter_kwargs)
+        spliter_func.compute = spliter_compute
+
+        merger_inputs = {}
+        for i in range(n_splits):
+            split_output = spliter_func.outputs[f"output_dir_{i}"]
+            worker_component_kwargs[name_of_input_to_split] = split_output
+            worker_func = worker_component(**worker_component_kwargs)
+            worker_func.compute = worker_compute
+            merger_inputs[f"input_dir_{i}"] = worker_func.outputs[f"output_dir"]
+
+        if merger_kwargs:
+            merger_inputs = {**merger_inputs, **merger_kwargs}
+
+        merger_func = merger_component(**merger_inputs)
+        merger_func.compute = merger_compute
+        return merger_func
+
+    return pipeline_comp_func
+# endregion: parallel pipeline component utils ################################################
