@@ -1,0 +1,70 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
+name: hf_dataset_download_w_token
+display_name: hf_dataset_download_w_token
+version: 0.0.4
+description: >
+  - hf_dataset_download_w_token
+
+  - 0.0.4: Fix seed param; fix subprocess.call so that it will output to current console
+
+  - 0.0.3: First download to temp dir and then copy to output_dir; remove .cache folder
+
+  - 0.0.2: Add aml_run
+
+  - 0.0.1: Initial version
+  
+is_deterministic: true
+tags:
+  author: jianwenzh@gmail.com
+type: command
+
+inputs:
+
+  dataset_name: 
+    type: string
+    # the huggingface model name, e.g., "meta-llama/Llama-2-7b-hf"
+
+  seed:
+    type: string
+    default: "0"
+    # for re-run, set to a different value
+
+  keyvault_url:
+    type: string
+    # the keyvault url where the huggingface token is stored
+
+  hf_token_key:
+    type: string
+    # the key in the keyvault where the huggingface token is stored
+
+
+outputs:
+  output_dir:
+    type: uri_folder
+
+code: .
+
+environment: azureml:amlflow-cpu:0.0.3
+  
+command: >-
+
+  df
+
+  mkdir ./tmp_download
+
+  python main.py 
+  --dataset_name ${{inputs.dataset_name}} 
+  --keyvault_url ${{inputs.keyvault_url}} 
+  --hf_token_key ${{inputs.hf_token_key}}
+  --aml_run True
+  --output_dir ./tmp_download
+
+  ls ./tmp_download
+
+  echo removig .cache folder
+
+  rm -rf ./tmp_download/.cache
+
+  echo copying to outputs.output_dir=${{outputs.output_dir}}
+
+  cp -r ./tmp_download/* ${{outputs.output_dir}}/
