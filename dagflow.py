@@ -45,6 +45,7 @@ class ResourceConfigs:
 class PipelineConfigs:
     experiment: str
     output_path: str
+    share_output: bool # Careful! All outputs will be shared to the same path, so make sure no conflict. Only used in the case when parallel jobs running and writting to the same output root path.
     input_data_assets: List[DatasetArgs]
     flow_steps_config: List[DAGFlowStepConfig]
     resource_config: ResourceConfigs
@@ -220,11 +221,15 @@ def run(
 
     output_path = pipeline_cfg.get('output_path', None)
     if output_path:
-        pipeline_output_path = pipeline_cfg.output_path.rstrip("/") + "/" + output_subfolder.rstrip("/")
+        pipeline_output_path = pipeline_cfg.output_path.rstrip("/") # + "/" + output_subfolder.rstrip("/")
+        output_mode = 'upload'
+        if 'output_mode' in pipeline_cfg and pipeline_cfg.output_mode:
+            output_mode = pipeline_cfg.output_mode
+            
         for k in pipeline_job.outputs:
-
+            path = pipeline_output_path if pipeline_cfg.get('share_output', False) else f"{pipeline_output_path}/{timestamp}/{k}/" + r"${{name}}"
             pipeline_job.outputs[k] = Output(
-                type="uri_folder", mode="upload", path=f"{pipeline_output_path}/{timestamp}/{k}/" + r"${{name}}" )
+                type="uri_folder", mode=output_mode, path=path)
 
     pipeline_run = aml_resources.ml_client_ws.jobs.create_or_update(
         pipeline_job,

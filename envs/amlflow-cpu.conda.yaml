@@ -7,4 +7,7 @@ dependencies:
   - pip:
     - huggingface_hub[cli]
     - fire
+    - azure-keyvault-secrets
+    - azure-identity
+    - azure-ai-ml
     
