@@ -1,9 +1,13 @@
 $schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
 name: dirs_files_merger
 display_name: dirs_files_merger
-version: 0.0.4
+version: 0.0.6
 description: >
   - dirs_files_merger
+
+  - 0.0.6: Add more input directories
+
+  - 0.0.5: Handle directories as well
 
   - 0.0.4: Update env
 
@@ -57,6 +61,206 @@ inputs:
     type: uri_folder
     optional: true
 
+  input_dir_10:
+    type: uri_folder
+    optional: true
+
+  input_dir_11:
+    type: uri_folder
+    optional: true
+
+  input_dir_12:
+    type: uri_folder
+    optional: true
+
+  input_dir_13:
+    type: uri_folder
+    optional: true
+
+  input_dir_14:
+    type: uri_folder
+    optional: true
+
+  input_dir_15:
+    type: uri_folder
+    optional: true
+
+  input_dir_16:
+    type: uri_folder
+    optional: true
+
+  input_dir_17:
+    type: uri_folder
+    optional: true
+
+  input_dir_18:
+    type: uri_folder
+    optional: true
+
+  input_dir_19:
+    type: uri_folder
+    optional: true
+
+  input_dir_20:
+    type: uri_folder
+    optional: true
+
+  input_dir_21:
+    type: uri_folder
+    optional: true
+
+  input_dir_22:
+    type: uri_folder
+    optional: true
+
+  input_dir_23:
+    type: uri_folder
+    optional: true
+
+  input_dir_24:
+    type: uri_folder
+    optional: true
+
+  input_dir_25:
+    type: uri_folder
+    optional: true
+
+  input_dir_26:
+    type: uri_folder
+    optional: true
+
+  input_dir_27:
+    type: uri_folder
+    optional: true
+
+  input_dir_28:
+    type: uri_folder
+    optional: true
+
+  input_dir_29:
+    type: uri_folder
+    optional: true
+  
+  input_dir_30:
+    type: uri_folder
+    optional: true
+
+  input_dir_31:
+    type: uri_folder
+    optional: true
+
+  input_dir_32:
+    type: uri_folder
+    optional: true
+
+  input_dir_33:
+    type: uri_folder
+    optional: true
+
+  input_dir_34:
+    type: uri_folder
+    optional: true
+
+  input_dir_35:
+    type: uri_folder
+    optional: true
+
+  input_dir_36:
+    type: uri_folder
+    optional: true
+
+  input_dir_37:
+    type: uri_folder
+    optional: true
+
+  input_dir_38:
+    type: uri_folder
+    optional: true
+
+  input_dir_39:
+    type: uri_folder
+    optional: true
+
+  input_dir_40:
+    type: uri_folder
+    optional: true
+
+  input_dir_41:
+    type: uri_folder
+    optional: true
+
+  input_dir_42:
+    type: uri_folder
+    optional: true
+
+  input_dir_43:
+    type: uri_folder
+    optional: true
+
+  input_dir_44:
+    type: uri_folder
+    optional: true
+
+  input_dir_45:
+    type: uri_folder
+    optional: true
+
+  input_dir_46:
+    type: uri_folder
+    optional: true
+
+  input_dir_47:
+    type: uri_folder
+    optional: true
+
+  input_dir_48:
+    type: uri_folder
+    optional: true
+
+  input_dir_49:
+    type: uri_folder
+    optional: true
+
+  input_dir_50:
+    type: uri_folder
+    optional: true
+  
+  input_dir_51:
+    type: uri_folder
+    optional: true
+
+  input_dir_52:
+    type: uri_folder
+    optional: true
+  
+  input_dir_53:
+    type: uri_folder
+    optional: true
+
+  input_dir_54:
+    type: uri_folder
+    optional: true
+
+  input_dir_55:
+    type: uri_folder
+    optional: true
+  
+  input_dir_56:
+    type: uri_folder
+    optional: true
+
+  input_dir_57:
+    type: uri_folder
+    optional: true
+
+  input_dir_58:
+    type: uri_folder
+    optional: true
+
+  input_dir_59:
+    type: uri_folder
+    optional: true
+
 outputs:
   
   output_dir:
@@ -79,4 +283,54 @@ command: >-
   $[[--input_dir_7 ${{inputs.input_dir_7}}]]
   $[[--input_dir_8 ${{inputs.input_dir_8}}]]
   $[[--input_dir_9 ${{inputs.input_dir_9}}]]
+  $[[--input_dir_10 ${{inputs.input_dir_10}}]]
+  $[[--input_dir_11 ${{inputs.input_dir_11}}]]
+  $[[--input_dir_12 ${{inputs.input_dir_12}}]]
+  $[[--input_dir_13 ${{inputs.input_dir_13}}]]
+  $[[--input_dir_14 ${{inputs.input_dir_14}}]]
+  $[[--input_dir_15 ${{inputs.input_dir_15}}]]
+  $[[--input_dir_16 ${{inputs.input_dir_16}}]]
+  $[[--input_dir_17 ${{inputs.input_dir_17}}]]
+  $[[--input_dir_18 ${{inputs.input_dir_18}}]]
+  $[[--input_dir_19 ${{inputs.input_dir_19}}]]
+  $[[--input_dir_20 ${{inputs.input_dir_20}}]]
+  $[[--input_dir_21 ${{inputs.input_dir_21}}]]
+  $[[--input_dir_22 ${{inputs.input_dir_22}}]]
+  $[[--input_dir_23 ${{inputs.input_dir_23}}]]
+  $[[--input_dir_24 ${{inputs.input_dir_24}}]]
+  $[[--input_dir_25 ${{inputs.input_dir_25}}]]
+  $[[--input_dir_26 ${{inputs.input_dir_26}}]]
+  $[[--input_dir_27 ${{inputs.input_dir_27}}]]
+  $[[--input_dir_28 ${{inputs.input_dir_28}}]]
+  $[[--input_dir_29 ${{inputs.input_dir_29}}]]
+  $[[--input_dir_30 ${{inputs.input_dir_30}}]]
+  $[[--input_dir_31 ${{inputs.input_dir_31}}]]
+  $[[--input_dir_32 ${{inputs.input_dir_32}}]]
+  $[[--input_dir_33 ${{inputs.input_dir_33}}]]
+  $[[--input_dir_34 ${{inputs.input_dir_34}}]]
+  $[[--input_dir_35 ${{inputs.input_dir_35}}]]
+  $[[--input_dir_36 ${{inputs.input_dir_36}}]]
+  $[[--input_dir_37 ${{inputs.input_dir_37}}]]
+  $[[--input_dir_38 ${{inputs.input_dir_38}}]]
+  $[[--input_dir_39 ${{inputs.input_dir_39}}]]
+  $[[--input_dir_40 ${{inputs.input_dir_40}}]]
+  $[[--input_dir_41 ${{inputs.input_dir_41}}]]
+  $[[--input_dir_42 ${{inputs.input_dir_42}}]]
+  $[[--input_dir_43 ${{inputs.input_dir_43}}]]
+  $[[--input_dir_44 ${{inputs.input_dir_44}}]]
+  $[[--input_dir_45 ${{inputs.input_dir_45}}]]
+  $[[--input_dir_46 ${{inputs.input_dir_46}}]]
+  $[[--input_dir_47 ${{inputs.input_dir_47}}]]
+  $[[--input_dir_48 ${{inputs.input_dir_48}}]]
+  $[[--input_dir_49 ${{inputs.input_dir_49}}]]
+  $[[--input_dir_50 ${{inputs.input_dir_50}}]]
+  $[[--input_dir_51 ${{inputs.input_dir_51}}]]
+  $[[--input_dir_52 ${{inputs.input_dir_52}}]]
+  $[[--input_dir_53 ${{inputs.input_dir_53}}]]
+  $[[--input_dir_54 ${{inputs.input_dir_54}}]]
+  $[[--input_dir_55 ${{inputs.input_dir_55}}]]
+  $[[--input_dir_56 ${{inputs.input_dir_56}}]]
+  $[[--input_dir_57 ${{inputs.input_dir_57}}]]
+  $[[--input_dir_58 ${{inputs.input_dir_58}}]]
+  $[[--input_dir_59 ${{inputs.input_dir_59}}]]
   --output_dir ${{outputs.output_dir}}

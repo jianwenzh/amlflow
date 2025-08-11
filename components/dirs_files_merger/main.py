@@ -37,15 +37,24 @@ def main(
     ]
     input_dirs = [d for d in input_dirs if d is not None]
 
-    for input_dir in input_dirs:
+    for i, input_dir in enumerate(input_dirs):
+        print(f"Processing input directory {i + 1}/{len(input_dirs)}: {input_dir}")
         files = os.listdir(input_dir)
         if files:
             print(f"Copying files from {input_dir} to {output_dir}")
             for file in files:
-                shutil.copy(os.path.join(input_dir, file), os.path.join(output_dir, file))
+                path = os.path.join(input_dir, file)
+                if os.path.isfile(path):
+                    # Copy the file to the output directory
+                    print(f"Copying file {file} to {output_dir}")
+                    shutil.copy(path, os.path.join(output_dir, file))
+                elif os.path.isdir(path):
+                    # If it's a directory, copy the entire directory
+                    print(f"Copying directory {file} to {output_dir}")
+                    shutil.copytree(path, os.path.join(output_dir, file), dirs_exist_ok=True)
 
         else:
-            print(f"No files found in {input_dir}, skipping.")
+            print(f"No items found in {input_dir}, skipping.")
 
 if __name__ == "__main__":
     fire.Fire(main)
