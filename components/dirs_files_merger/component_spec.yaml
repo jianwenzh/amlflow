@@ -1,9 +1,11 @@
 $schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
 name: dirs_files_merger
 display_name: dirs_files_merger
-version: 0.0.6
+version: 0.0.7
 description: >
   - dirs_files_merger
+
+  - 0.0.7: Fix py code args
 
   - 0.0.6: Add more input directories
 
