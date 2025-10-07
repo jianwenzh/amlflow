@@ -187,6 +187,10 @@ def create_pipeline(
     def _pipeline_6_inputs(input_data_asset_1: Input, input_data_asset_2: Input, input_data_asset_3: Input, input_data_asset_4: Input, input_data_asset_5: Input, input_data_asset_6: Input):
         return _pipeline_func(input_data_assets=[input_data_asset_1, input_data_asset_2, input_data_asset_3, input_data_asset_4, input_data_asset_5, input_data_asset_6])
 
+    @pipeline(name=name, compute=aml_resources.cpu_target)
+    def _pipeline_7_inputs(input_data_asset_1: Input, input_data_asset_2: Input, input_data_asset_3: Input, input_data_asset_4: Input, input_data_asset_5: Input, input_data_asset_6: Input, input_data_asset_7: Input):
+        return _pipeline_func(input_data_assets=[input_data_asset_1, input_data_asset_2, input_data_asset_3, input_data_asset_4, input_data_asset_5, input_data_asset_6, input_data_asset_7])
+
     pipeline_map = {
         1: _pipeline_1_input,
         2: _pipeline_2_inputs,
@@ -194,6 +198,7 @@ def create_pipeline(
         4: _pipeline_4_inputs,
         5: _pipeline_5_inputs,
         6: _pipeline_6_inputs,
+        7: _pipeline_7_inputs,
     }
 
     return pipeline_map[len(pipeline_configs.input_data_assets)]
