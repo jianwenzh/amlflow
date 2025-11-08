@@ -191,6 +191,26 @@ def create_pipeline(
     def _pipeline_7_inputs(input_data_asset_1: Input, input_data_asset_2: Input, input_data_asset_3: Input, input_data_asset_4: Input, input_data_asset_5: Input, input_data_asset_6: Input, input_data_asset_7: Input):
         return _pipeline_func(input_data_assets=[input_data_asset_1, input_data_asset_2, input_data_asset_3, input_data_asset_4, input_data_asset_5, input_data_asset_6, input_data_asset_7])
 
+    @pipeline(name=name, compute=aml_resources.cpu_target)
+    def _pipeline_8_inputs(input_data_asset_1: Input, input_data_asset_2: Input, input_data_asset_3: Input, input_data_asset_4: Input, input_data_asset_5: Input, input_data_asset_6: Input, input_data_asset_7: Input, input_data_asset_8: Input):
+        return _pipeline_func(input_data_assets=[input_data_asset_1, input_data_asset_2, input_data_asset_3, input_data_asset_4, input_data_asset_5, input_data_asset_6, input_data_asset_7, input_data_asset_8])
+
+    @pipeline(name=name, compute=aml_resources.cpu_target)
+    def _pipeline_9_inputs(input_data_asset_1: Input, input_data_asset_2: Input, input_data_asset_3: Input, input_data_asset_4: Input, input_data_asset_5: Input, input_data_asset_6: Input, input_data_asset_7: Input, input_data_asset_8: Input, input_data_asset_9: Input):
+        return _pipeline_func(input_data_assets=[input_data_asset_1, input_data_asset_2, input_data_asset_3, input_data_asset_4, input_data_asset_5, input_data_asset_6, input_data_asset_7, input_data_asset_8, input_data_asset_9])
+
+    @pipeline(name=name, compute=aml_resources.cpu_target)
+    def _pipeline_10_inputs(input_data_asset_1: Input, input_data_asset_2: Input, input_data_asset_3: Input, input_data_asset_4: Input, input_data_asset_5: Input, input_data_asset_6: Input, input_data_asset_7: Input, input_data_asset_8: Input, input_data_asset_9: Input, input_data_asset_10: Input):
+        return _pipeline_func(input_data_assets=[input_data_asset_1, input_data_asset_2, input_data_asset_3, input_data_asset_4, input_data_asset_5, input_data_asset_6, input_data_asset_7, input_data_asset_8, input_data_asset_9, input_data_asset_10])
+
+    @pipeline(name=name, compute=aml_resources.cpu_target)
+    def _pipeline_11_inputs(input_data_asset_1: Input, input_data_asset_2: Input, input_data_asset_3: Input, input_data_asset_4: Input, input_data_asset_5: Input, input_data_asset_6: Input, input_data_asset_7: Input, input_data_asset_8: Input, input_data_asset_9: Input, input_data_asset_10: Input, input_data_asset_11: Input):
+        return _pipeline_func(input_data_assets=[input_data_asset_1, input_data_asset_2, input_data_asset_3, input_data_asset_4, input_data_asset_5, input_data_asset_6, input_data_asset_7, input_data_asset_8, input_data_asset_9, input_data_asset_10, input_data_asset_11])
+
+    @pipeline(name=name, compute=aml_resources.cpu_target)
+    def _pipeline_12_inputs(input_data_asset_1: Input, input_data_asset_2: Input, input_data_asset_3: Input, input_data_asset_4: Input, input_data_asset_5: Input, input_data_asset_6: Input, input_data_asset_7: Input, input_data_asset_8: Input, input_data_asset_9: Input, input_data_asset_10: Input, input_data_asset_11: Input, input_data_asset_12: Input):
+        return _pipeline_func(input_data_assets=[input_data_asset_1, input_data_asset_2, input_data_asset_3, input_data_asset_4, input_data_asset_5, input_data_asset_6, input_data_asset_7, input_data_asset_8, input_data_asset_9, input_data_asset_10, input_data_asset_11, input_data_asset_12])
+
     pipeline_map = {
         1: _pipeline_1_input,
         2: _pipeline_2_inputs,
@@ -199,6 +219,11 @@ def create_pipeline(
         5: _pipeline_5_inputs,
         6: _pipeline_6_inputs,
         7: _pipeline_7_inputs,
+        8: _pipeline_8_inputs,
+        9: _pipeline_9_inputs,
+        10: _pipeline_10_inputs,
+        11: _pipeline_11_inputs,
+        12: _pipeline_12_inputs,
     }
 
     return pipeline_map[len(pipeline_configs.input_data_assets)]
