@@ -1,0 +1,8 @@
+name: openmpi50-cuda124-ubuntu2204-py310
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+    
