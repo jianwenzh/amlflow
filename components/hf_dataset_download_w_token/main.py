@@ -23,8 +23,10 @@ def main(
     if hf_token is None or len(hf_token) == 0:
         raise ValueError("hf_token is none or empty!")
 
+    # subprocess.run(
+    #     ["huggingface-cli", "download", dataset_name, "--repo-type", "dataset", "--local-dir", output_dir, "--token", hf_token])
     subprocess.run(
-        ["huggingface-cli", "download", dataset_name, "--repo-type", "dataset", "--local-dir", output_dir, "--token", hf_token])
+        ["hf", "download", dataset_name, "--repo-type", "dataset", "--local-dir", output_dir, "--token", hf_token])
     
     print(f"Download done.")
     

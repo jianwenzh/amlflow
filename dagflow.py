@@ -211,6 +211,14 @@ def create_pipeline(
     def _pipeline_12_inputs(input_data_asset_1: Input, input_data_asset_2: Input, input_data_asset_3: Input, input_data_asset_4: Input, input_data_asset_5: Input, input_data_asset_6: Input, input_data_asset_7: Input, input_data_asset_8: Input, input_data_asset_9: Input, input_data_asset_10: Input, input_data_asset_11: Input, input_data_asset_12: Input):
         return _pipeline_func(input_data_assets=[input_data_asset_1, input_data_asset_2, input_data_asset_3, input_data_asset_4, input_data_asset_5, input_data_asset_6, input_data_asset_7, input_data_asset_8, input_data_asset_9, input_data_asset_10, input_data_asset_11, input_data_asset_12])
 
+    @pipeline(name=name, compute=aml_resources.cpu_target)
+    def _pipeline_13_inputs(input_data_asset_1: Input, input_data_asset_2: Input, input_data_asset_3: Input, input_data_asset_4: Input, input_data_asset_5: Input, input_data_asset_6: Input, input_data_asset_7: Input, input_data_asset_8: Input, input_data_asset_9: Input, input_data_asset_10: Input, input_data_asset_11: Input, input_data_asset_12: Input, input_data_asset_13: Input):
+        return _pipeline_func(input_data_assets=[input_data_asset_1, input_data_asset_2, input_data_asset_3, input_data_asset_4, input_data_asset_5, input_data_asset_6, input_data_asset_7, input_data_asset_8, input_data_asset_9, input_data_asset_10, input_data_asset_11, input_data_asset_12, input_data_asset_13])
+
+    @pipeline(name=name, compute=aml_resources.cpu_target)
+    def _pipeline_14_inputs(input_data_asset_1: Input, input_data_asset_2: Input, input_data_asset_3: Input, input_data_asset_4: Input, input_data_asset_5: Input, input_data_asset_6: Input, input_data_asset_7: Input, input_data_asset_8: Input, input_data_asset_9: Input, input_data_asset_10: Input, input_data_asset_11: Input, input_data_asset_12: Input, input_data_asset_13: Input, input_data_asset_14: Input):
+        return _pipeline_func(input_data_assets=[input_data_asset_1, input_data_asset_2, input_data_asset_3, input_data_asset_4, input_data_asset_5, input_data_asset_6, input_data_asset_7, input_data_asset_8, input_data_asset_9, input_data_asset_10, input_data_asset_11, input_data_asset_12, input_data_asset_13, input_data_asset_14])
+
     pipeline_map = {
         1: _pipeline_1_input,
         2: _pipeline_2_inputs,
@@ -224,6 +232,8 @@ def create_pipeline(
         10: _pipeline_10_inputs,
         11: _pipeline_11_inputs,
         12: _pipeline_12_inputs,
+        13: _pipeline_13_inputs,
+        14: _pipeline_14_inputs,
     }
 
     return pipeline_map[len(pipeline_configs.input_data_assets)]
