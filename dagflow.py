@@ -161,7 +161,7 @@ def create_pipeline(
 
             step_idx += 1
 
-        return step_outputs
+        # return step_outputs
     
     @pipeline(name=name, compute=aml_resources.cpu_target)
     def _pipeline_1_input(input_data_asset: Input):
@@ -266,20 +266,20 @@ def run(
 
     pipeline_job = pipeline_fn(*input_data_assets)
 
-    # recording the cfgs in job properties
-    pipeline_job.properties["pipeline_config"] = pipeline_cfg
+    # # recording the cfgs in job properties
+    # pipeline_job.properties["pipeline_config"] = pipeline_cfg
 
-    output_path = pipeline_cfg.get('output_path', None)
-    if output_path:
-        pipeline_output_path = pipeline_cfg.output_path.rstrip("/") # + "/" + output_subfolder.rstrip("/")
-        output_mode = 'upload'
-        if 'output_mode' in pipeline_cfg and pipeline_cfg.output_mode:
-            output_mode = pipeline_cfg.output_mode
+    # output_path = pipeline_cfg.get('output_path', None)
+    # if output_path:
+    #     pipeline_output_path = pipeline_cfg.output_path.rstrip("/") # + "/" + output_subfolder.rstrip("/")
+    #     output_mode = 'upload'
+    #     if 'output_mode' in pipeline_cfg and pipeline_cfg.output_mode:
+    #         output_mode = pipeline_cfg.output_mode
             
-        for k in pipeline_job.outputs:
-            path = pipeline_output_path if pipeline_cfg.get('share_output', False) else f"{pipeline_output_path}/{timestamp}/{k}/" + r"${{name}}"
-            pipeline_job.outputs[k] = Output(
-                type="uri_folder", mode=output_mode, path=path)
+    #     for k in pipeline_job.outputs:
+    #         path = pipeline_output_path if pipeline_cfg.get('share_output', False) else f"{pipeline_output_path}/{timestamp}/{k}/" + r"${{name}}"
+    #         pipeline_job.outputs[k] = Output(
+    #             type="uri_folder", mode=output_mode, path=path)
 
     pipeline_run = aml_resources.ml_client_ws.jobs.create_or_update(
         pipeline_job,
