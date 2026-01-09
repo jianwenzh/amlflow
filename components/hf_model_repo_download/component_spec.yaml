@@ -1,0 +1,73 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
+name: hf_model_repo_download
+display_name: hf_model_repo_download
+version: 0.0.1
+description: >
+  - hf_model_repo_download
+
+  - 0.0.1: Initial version
+  
+is_deterministic: true
+tags:
+  author: jianwenzh@gmail.com
+type: command
+
+inputs:
+
+  repo_name: 
+    type: string
+
+  seed:
+    type: string
+    default: "0"
+    # for re-run, set to a different value
+
+
+outputs:
+  output_dir:
+    type: uri_folder
+
+code: .
+
+environment: azureml:amlflow-cpu:0.0.1
+  
+command: >-
+
+  df
+  
+  echo 'Installing git...'
+
+  apt install git-all
+
+  # install git lfs
+
+  echo 'Adding packagecloud.io repository for git-lfs...'
+
+  curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash
+
+  echo 'Installing git-lfs...'
+
+  apt-get install -y git-lfs
+
+  echo 'Installing git-xet...'
+
+  curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/huggingface/xet-core/refs/heads/main/git_xet/install.sh | sh
+
+  echo 'Verify git-xet version...'
+
+  git xet --version
+
+  echo 'Cloning model repo from huggingface...'
+
+  cd ${{outputs.output_dir}}
+
+  realpath .
+
+  ls .
+
+  echo 'Removing any existing files...'
+
+  rm -rf ./*
+
+  git clone https://huggingface.co/${{inputs.repo_name}}
+  
