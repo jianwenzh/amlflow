@@ -10,13 +10,14 @@ import yaml
     
 def main(
         config_file: str, 
+        key_config: str = "wus2", # -k, key in aml_config.yaml, default is "wus2"
         src_path: str = "./src", # -s, relative path to src folder, default is "src"
     ):
 
     with open("./aml_config.yaml", 'r') as file:
         aml_config = yaml.safe_load(file)
 
-    subscription_id, resource_group, target = aml_config['subscription_id'], aml_config['resource_group'], aml_config['target']
+    subscription_id, resource_group, target = aml_config[key_config]['subscription_id'], aml_config[key_config]['resource_group'], aml_config[key_config]['target']
 
     # Create a credential object using DefaultAzureCredential
     credential = DefaultAzureCredential()
