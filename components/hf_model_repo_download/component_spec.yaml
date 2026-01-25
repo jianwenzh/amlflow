@@ -1,9 +1,11 @@
 $schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
 name: hf_model_repo_download
 display_name: hf_model_repo_download
-version: 0.0.1
+version: 0.0.2
 description: >
   - hf_model_repo_download
+
+  - 0.0.3: Upgrade amlflow-cpu env to 0.0.3
 
   - 0.0.1: Initial version
   
@@ -29,7 +31,7 @@ outputs:
 
 code: .
 
-environment: azureml:amlflow-cpu:0.0.1
+environment: azureml:amlflow-cpu:0.0.3
   
 command: >-
 

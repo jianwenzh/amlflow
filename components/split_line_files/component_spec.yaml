@@ -1,0 +1,59 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
+name: split_line_files
+display_name: split_line_files
+version: 0.0.2
+description: >
+  - split_line_files
+
+  - 0.0.2: Fix glob
+
+  - 0.0.1: Initial version
+  
+is_deterministic: true
+tags:
+  author: jianwenzh@gmail.com
+type: command
+
+inputs:
+
+  input_dir:
+    type: uri_folder
+
+  n_splits:
+    type: integer
+
+  glob_patterns:
+    type: string
+    default: "*"
+    
+outputs:
+  output_dir_0:
+    type: uri_folder
+
+  output_dir_1:
+    type: uri_folder
+  
+  output_dir_2:
+    type: uri_folder
+
+  output_dir_3:
+    type: uri_folder
+
+  output_dir_4:
+    type: uri_folder
+    
+code: .
+
+environment: azureml:amlflow-cpu:0.0.3
+  
+command: >-
+
+  python main.py 
+  --input_dir ${{inputs.input_dir}}
+  --n_splits ${{inputs.n_splits}}
+  --glob_patterns ${{inputs.glob_patterns}}
+  --output_dir_0 ${{outputs.output_dir_0}}
+  --output_dir_1 ${{outputs.output_dir_1}}
+  --output_dir_2 ${{outputs.output_dir_2}}
+  --output_dir_3 ${{outputs.output_dir_3}}
+  --output_dir_4 ${{outputs.output_dir_4}}
