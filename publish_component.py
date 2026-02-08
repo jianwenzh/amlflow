@@ -12,6 +12,7 @@ def main(
         config_file: str, 
         key_config: str = "wus2", # -k, key in aml_config.yaml, default is "wus2"
         src_path: str = "./src", # -s, relative path to src folder, default is "src"
+        extra_ignore: str = None, # -e, extra ignore patterns separated by comma, default is None
     ):
 
     with open("./aml_config.yaml", 'r') as file:
@@ -60,8 +61,14 @@ def main(
         target_src_dir = os.path.join(comp_dir, "src")
         if os.path.exists(target_src_dir) and os.path.isdir(target_src_dir):
             raise RuntimeError(f"target src folder already exists: {target_src_dir}. Please remove it.")
-            
-        shutil.copytree(src=local_src_abs_path, dst=target_src_dir, ignore=shutil.ignore_patterns("*.pyc", "__pycache__", ".git"))
+        
+        ignore_patterns = ["*.pyc", "__pycache__", ".git"]
+        if extra_ignore is not None:
+            extra_ignore_list = [x.strip() for x in extra_ignore.split(",")]
+            ignore_patterns.extend(extra_ignore_list)
+            print(f"extra ignore patterns: {extra_ignore_list}")
+        print(f"ignore patterns: {ignore_patterns}")
+        shutil.copytree(src=local_src_abs_path, dst=target_src_dir, ignore=shutil.ignore_patterns(*ignore_patterns))
     
     print("load and pubish component")
     component = load_component(config_file)
