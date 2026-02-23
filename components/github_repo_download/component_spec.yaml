@@ -1,15 +1,9 @@
 $schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
-name: hf_dataset_repo_download
-display_name: hf_dataset_repo_download
-version: 0.0.4
+name: github_repo_download
+display_name: github_repo_download
+version: 0.0.1
 description: >
-  - hf_dataset_repo_download
-
-  - 0.0.4: Update environment to amlflow-cpu:0.0.3
-
-  - 0.0.3: Remove output folder before start, in case if preemption happens
-
-  - 0.0.2: Install and use git-xet to clone repo
+  - github_repo_download
 
   - 0.0.1: Initial version
   
@@ -20,7 +14,8 @@ type: command
 
 inputs:
 
-  repo_name: 
+  # the full https url
+  repo_url: 
     type: string
 
   seed:
@@ -63,7 +58,7 @@ command: >-
 
   git xet --version
 
-  echo 'Cloning dataset repo from huggingface...'
+  echo 'Cloning repo from ${{inputs.repo_url}}...'
 
   cd ${{outputs.output_dir}}
 
@@ -75,5 +70,5 @@ command: >-
 
   rm -rf ./*
 
-  git clone https://huggingface.co/datasets/${{inputs.repo_name}}
+  git clone ${{inputs.repo_url}}
   
